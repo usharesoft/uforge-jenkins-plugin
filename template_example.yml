@@ -1,0 +1,30 @@
+---
+stack:
+  name: "Jenkins UForge library example"
+  version: "1.0"
+  installation:
+    partitioning:
+      disks:
+      - name: "sda"
+        type: "msdos"
+        size: 12288
+        partitions:
+        - number: 1
+          fstype: "ext3"
+          mountPoint: "/"
+          label: "/"
+          size: 64
+          grow: true
+        - number: 2
+          fstype: "linux-swap"
+          size: 512
+  os:
+    name: "CentOS"
+    version: "7"
+    arch: "x86_64"
+    profile: "minimal"
+builders:
+- type: "VirtualBox"
+  hardwareSettings:
+    memory: 1024
+apiVersion: "1.0"
