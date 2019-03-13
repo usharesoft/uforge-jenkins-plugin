@@ -55,3 +55,7 @@ parameters {
     string(name: 'TEMPLATE_PATH', defaultValue: '<TEMPLATE_PATH>', description: '')
 }
 ```
+
+## Test
+
+The library can be tested using `pipeline_example.groovy` and `template_example.yml`. It creates a machine image and generates it on VirtualBox.
