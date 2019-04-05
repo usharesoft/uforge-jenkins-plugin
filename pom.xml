@@ -9,7 +9,7 @@
 
     <groupId>com.usharesoft.jenkins</groupId>
     <artifactId>uforge-appcenter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <properties>
         <jenkins.version>2.150.2</jenkins.version>
@@ -26,6 +26,13 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</connection>
+        <url>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</url>
+        <developerConnection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -38,4 +45,12 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>maven.usharesoft.com</id>
+            <name>UShareSoft Public Maven Repository</name>
+            <url>https://maven.usharesoft.com/repository/official/</url>
+        </repository>
+    </distributionManagement>
 </project>
