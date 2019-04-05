@@ -2,12 +2,15 @@ package com.usharesoft.jenkins;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Label;
 import hudson.model.Result;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -20,8 +23,15 @@ public class UForgeBuilderTest {
     private static final String PASSWORD = "password";
     private static final String TEMPLATE_PATH = "./template.yml";
 
+    private UForgeBuilder builder;
+
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
+
+    @Before
+    public void before() {
+        this.builder = spy(new UForgeBuilder(URL, VERSION, LOGIN, PASSWORD, TEMPLATE_PATH));
+    }
 
     @Test
     public void should_project_stay_unchanged_and_password_hidden_after_roundtrip_configuration() throws Exception {
@@ -39,35 +49,16 @@ public class UForgeBuilderTest {
     @Test
     public void should_builder_builds_successfully_in_freestyle_project() throws Exception {
         // given
+        String script = "echo UForge AppCenter plugin";
+        doReturn(script).when(builder).createScript(any());
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new UForgeBuilder(URL, VERSION, LOGIN, PASSWORD, TEMPLATE_PATH));
+        project.getBuildersList().add(builder);
 
         // when
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
 
         // then
         jenkins.assertLogContains("UForge AppCenter plugin", build);
-    }
-
-    @Test
-    public void should_builder_builds_successfully_in_scripted_pipeline() throws Exception {
-        // given
-        WorkflowJob job = jenkins.createProject(WorkflowJob.class, "test-scripted-pipeline");
-        String pipelineScript
-                = "node {\n"
-                + "  uforge url: '" + URL + "', "
-                + "version: '" + VERSION + "', "
-                + "login: '" + LOGIN + "', "
-                + "password: '" + PASSWORD + "', "
-                + "templatePath : '" + TEMPLATE_PATH + "'\n"
-                + "}";
-        job.setDefinition(new CpsFlowDefinition(pipelineScript, true));
-
-        // when
-        WorkflowRun completedBuild = jenkins.assertBuildStatusSuccess(job.scheduleBuild2(0));
-
-        // then
-        jenkins.assertLogContains("UForge AppCenter plugin", completedBuild);
     }
 
     @Test

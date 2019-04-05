@@ -16,7 +16,6 @@ import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 import java.io.PrintStream;
-
 import jenkins.tasks.SimpleBuildStep;
 import org.jenkinsci.Symbol;
 
@@ -83,11 +82,29 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
+    private String escapeDoublesQuotes(String string) {
+        return string.replace("\"", "\\\"");
+    }
+
+    String createScript(FilePath workspace) {
+        String hammrWorkspace = workspace + "/hammr";
+        String escapedPassword = escapeDoublesQuotes(password);
+
+        return "virtualenv --python=python2.7 " + hammrWorkspace + ";"
+                + ". " + hammrWorkspace + "/bin/activate;"
+                + "pip install hammr==" + version + ";"
+                + "hammr template create --url " + url + " -u " + login + " -p \"" + escapedPassword + "\" --file " + templatePath + ";"
+                + "hammr template build --url " + url + " -u " + login + " -p \"" + escapedPassword + "\" --file " + templatePath + ";"
+                + "deactivate";
+    }
+
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         checkParameters(listener.getLogger());
 
-        listener.getLogger().println("UForge AppCenter plugin");
+        String script = createScript(workspace);
+        UForgeLauncher scriptLauncher = new UForgeLauncher(run, workspace, launcher, listener);
+        scriptLauncher.launchScript(script);
     }
 
     @Extension @Symbol("uforge")
