@@ -90,21 +90,21 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         String hammrWorkspace = workspace + "/hammr";
         String escapedPassword = escapeDoublesQuotes(password);
 
-        return "virtualenv --python=python2.7 " + hammrWorkspace + ";"
-                + ". " + hammrWorkspace + "/bin/activate;"
-                + "pip install hammr==" + version + ";"
-                + "hammr template create --url " + url + " -u " + login + " -p \"" + escapedPassword + "\" --file " + templatePath + ";"
-                + "hammr template build --url " + url + " -u " + login + " -p \"" + escapedPassword + "\" --file " + templatePath + ";"
-                + "deactivate";
+        return new UForgeScript(url, version, login, escapedPassword, templatePath, hammrWorkspace).getScript();
     }
 
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         checkParameters(listener.getLogger());
 
+        UForgeEnvironmentVariables uForgeEnvVars = new UForgeEnvironmentVariables();
         String script = createScript(workspace);
-        UForgeLauncher scriptLauncher = new UForgeLauncher(run, workspace, launcher, listener);
+        UForgeLauncher scriptLauncher = new UForgeLauncher(run, workspace, launcher, listener, uForgeEnvVars);
         scriptLauncher.launchScript(script);
+
+        if (uForgeEnvVars != null) {
+            run.addAction(uForgeEnvVars);
+        }
     }
 
     @Extension @Symbol("uforge")

@@ -26,7 +26,7 @@ public class UForgeLauncherTest {
 
     @Spy
     @InjectMocks
-    UForgeLauncher uForgeLauncher;
+    private UForgeLauncher uForgeLauncher;
 
     @Mock
     private Controller controller;

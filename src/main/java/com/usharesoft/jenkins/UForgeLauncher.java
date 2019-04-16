@@ -24,12 +24,14 @@ public class UForgeLauncher {
     private FilePath workspace;
     private Launcher launcher;
     private TaskListener listener;
+    private UForgeEnvironmentVariables uForgeEnvVars;
 
-    public UForgeLauncher(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) {
+    public UForgeLauncher(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener, UForgeEnvironmentVariables uForgeEnvVars) {
         this.run = run;
         this.workspace = workspace;
         this.launcher = launcher;
         this.listener = listener;
+        this.uForgeEnvVars = uForgeEnvVars;
     }
 
     public void launchScript(String script) throws InterruptedException, IOException {
@@ -60,16 +62,33 @@ public class UForgeLauncher {
 
     void printLogs(ByteArrayOutputStream byteArr) throws IOException {
         InputStream inputStream = new ByteArrayInputStream(byteArr.toByteArray());
-        IOUtils.readLines(inputStream, StandardCharsets.UTF_8)
-                .forEach(line ->  listener.getLogger().println(sanitizeLine(line)));
+        for(String line : IOUtils.readLines(inputStream, StandardCharsets.UTF_8)) {
+            fillApplianceIdEnvVar(line);
+            fillImageIdEnvVar(line);
+            listener.getLogger().println(sanitizeLine(line));
+        }
     }
 
-    String sanitizeLine(String line) {
+    private String sanitizeLine(String line) {
         Pattern p = Pattern.compile("(\\+ hammr.* -p )(\".*\")(.*)");
         Matcher m = p.matcher(line);
         if (m.find()) {
             line = m.group(1) + MASKED_PASSWORD + m.group(3);
         }
         return line;
+    }
+
+    private void fillApplianceIdEnvVar(String line) {
+        if (line.startsWith("Template Id")) {
+            String[] splitLine = line.split(" ");
+            uForgeEnvVars.addEnvVar("UFORGE_APPLIANCE_ID", splitLine[splitLine.length - 1]);
+        }
+    }
+
+    private void fillImageIdEnvVar(String line) {
+        if (line.startsWith("Image Id")) {
+            String[] splitLine = line.split(" ");
+            uForgeEnvVars.addEnvVar("UFORGE_IMAGE_ID", splitLine[splitLine.length - 1]);
+        }
     }
 }
