@@ -31,6 +31,7 @@ public class UForgeStream extends FilterOutputStream {
             println(line);
             fillApplianceIdEnvVar(line);
             fillImageIdEnvVar(line);
+            fillCloudIdEnvVar(line);
         }
     }
 
@@ -51,6 +52,14 @@ public class UForgeStream extends FilterOutputStream {
         Matcher m = r.matcher(line);
         if (m.find()) {
             uForgeEnvVars.addEnvVar("UFORGE_IMAGE_ID", m.group(1));
+        }
+    }
+
+    void fillCloudIdEnvVar(String line) {
+        Pattern r = Pattern.compile("^Cloud ID\\s*:\\s*(\\S+)$");
+        Matcher m = r.matcher(line);
+        if (m.find()) {
+            uForgeEnvVars.addEnvVar("UFORGE_CLOUD_ID", m.group(1));
         }
     }
 }

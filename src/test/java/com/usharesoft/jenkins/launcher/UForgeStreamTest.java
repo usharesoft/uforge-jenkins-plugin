@@ -70,4 +70,16 @@ public class UForgeStreamTest {
         // then
         verify(uForgeEnvironmentVariables).addEnvVar("UFORGE_IMAGE_ID", "1234");
     }
+
+    @Test
+    public void should_fillCloudIdEnvVar_add_env_var() {
+        // given
+        doNothing().when(uForgeEnvironmentVariables).addEnvVar(anyString(), anyString());
+
+        // when
+        uForgeStream.fillCloudIdEnvVar("Cloud ID : abcd-1234");
+
+        // then
+        verify(uForgeEnvironmentVariables).addEnvVar("UFORGE_CLOUD_ID", "abcd-1234");
+    }
 }
