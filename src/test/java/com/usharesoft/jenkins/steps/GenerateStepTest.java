@@ -1,5 +1,7 @@
 package com.usharesoft.jenkins.steps;
 
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
 import org.mockito.InjectMocks;
@@ -38,14 +40,15 @@ public class GenerateStepTest {
     @Mock
     private ArgumentListBuilder args;
 
+    @Mock
+    private StandardUsernamePasswordCredentials credentials;
+
     @BeforeMethod
     public void setUp() throws Exception {
         initMocks(this);
         FieldSetter.setField(generateStep, HammrStep.class.getDeclaredField("url"), URL);
-        FieldSetter.setField(generateStep, HammrStep.class.getDeclaredField("login"), LOGIN);
-        FieldSetter.setField(generateStep, HammrStep.class.getDeclaredField("password"), PASSWORD);
+        FieldSetter.setField(generateStep, HammrStep.class.getDeclaredField("credentials"), credentials);
         FieldSetter.setField(generateStep, HammrStep.class.getDeclaredField("templatePath"), TEMPLATE);
-        FieldSetter.setField(generateStep, UForgeStep.class.getDeclaredField("launcher"), launcher);
     }
 
     @Test
@@ -67,6 +70,8 @@ public class GenerateStepTest {
     public void should_getHammrCommand_return_good_command() {
         // given
         doReturn(new FilePath(new File("workspace"))).when(launcher).getScriptWorkspace();
+        doReturn(LOGIN).when(generateStep).getUsername();
+        doReturn(PASSWORD).when(generateStep).getPassword();
 
         ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
         expectedArgs.add("workspace/bin/hammr");

@@ -5,6 +5,7 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -19,8 +20,7 @@ public class UForgeBuilderTest {
 
     private static final String URL = "http://my-forge.com/api";
     private static final String VERSION = "3.8.11";
-    private static final String LOGIN = "login";
-    private static final String PASSWORD = "password";
+    private static final String CREDENTIALS_ID = "my-credentials";
     private static final String TEMPLATE_PATH = "./template.yml";
 
     private UForgeBuilder builder;
@@ -30,26 +30,28 @@ public class UForgeBuilderTest {
 
     @Before
     public void before() {
-        this.builder = spy(new UForgeBuilder(URL, VERSION, LOGIN, PASSWORD, TEMPLATE_PATH));
+        this.builder = spy(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH));
     }
 
     @Test
     public void should_project_stay_unchanged_and_password_hidden_after_roundtrip_configuration() throws Exception {
         // given
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new UForgeBuilder(URL, VERSION, LOGIN, PASSWORD, TEMPLATE_PATH));
+        project.getBuildersList().add(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH));
 
         // when
         project = jenkins.configRoundtrip(project);
 
         // then
-        jenkins.assertEqualDataBoundBeans(new UForgeBuilder(URL, VERSION, LOGIN, "", TEMPLATE_PATH), project.getBuildersList().get(0));
+        jenkins.assertEqualDataBoundBeans(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH), project.getBuildersList().get(0));
     }
 
     @Test
     public void should_builder_builds_successfully_in_freestyle_project() throws Exception {
         // given
         doNothing().when(builder).perform(any(), any(), any(), any());
+        doReturn(null).when(builder).retrieveCredentials(any());
+
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(builder);
 
@@ -65,8 +67,7 @@ public class UForgeBuilderTest {
                 = "node {\n"
                 + "  uforge "
                 + "version: '" + VERSION + "', "
-                + "login: '" + LOGIN + "', "
-                + "password: '" + PASSWORD + "', "
+                + "credentialsId: '" + CREDENTIALS_ID + "', "
                 + "templatePath : '" + TEMPLATE_PATH + "'\n"
                 + "}";
         job.setDefinition(new CpsFlowDefinition(pipelineScript, true));

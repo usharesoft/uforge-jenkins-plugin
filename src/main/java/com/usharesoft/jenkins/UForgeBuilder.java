@@ -1,16 +1,24 @@
 package com.usharesoft.jenkins;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 import com.usharesoft.jenkins.steps.CreateStep;
 import com.usharesoft.jenkins.steps.GenerateStep;
 import com.usharesoft.jenkins.steps.InstallStep;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 
 import hudson.AbortException;
 import hudson.Extension;
@@ -18,26 +26,28 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 
 public class UForgeBuilder extends Builder implements SimpleBuildStep {
     private final String url;
     private final String version;
-    private final String login;
-    private final String password;
+    private final String credentialsId;
     private final String templatePath;
 
     @DataBoundConstructor
-    public UForgeBuilder(String url, String version, String login, String password, String templatePath) {
+    public UForgeBuilder(String url, String version, String credentialsId, String templatePath) {
         this.url = Util.fixNull(url);
         this.version = Util.fixNull(version);
-        this.login = Util.fixNull(login);
-        this.password = Util.fixNull(password);
+        this.credentialsId = Util.fixNull(credentialsId);
         this.templatePath = Util.fixNull(templatePath);
     }
 
@@ -49,12 +59,8 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         return version;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public String getPassword() {
-        return password;
+    public String getCredentialsId() {
+        return credentialsId;
     }
 
     public String getTemplatePath() {
@@ -71,12 +77,8 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
             logger.println(Messages.UForgeBuilder_errors_missingVersion());
             missingParameter = true;
         }
-        if (login.isEmpty()) {
-            logger.println(Messages.UForgeBuilder_errors_missingLogin());
-            missingParameter = true;
-        }
-        if (password.isEmpty()) {
-            logger.println(Messages.UForgeBuilder_errors_missingPassword());
+        if (credentialsId.isEmpty()) {
+            logger.println(Messages.UForgeBuilder_errors_missingCredentialsId());
             missingParameter = true;
         }
         if (templatePath.isEmpty()) {
@@ -88,11 +90,20 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
+    StandardUsernamePasswordCredentials retrieveCredentials(Run<?, ?> run) throws AbortException {
+        StandardUsernamePasswordCredentials credentials = CredentialsProvider.findCredentialById(credentialsId, StandardUsernamePasswordCredentials.class, run, Collections.<DomainRequirement>emptyList());
+        if (credentials == null) {
+            throw new AbortException(Messages.UForgeBuilder_errors_credentialsNotFound());
+        }
+        return credentials;
+    }
+
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         checkParameters(listener.getLogger());
 
         UForgeEnvironmentVariables envAction = new UForgeEnvironmentVariables();
+        StandardUsernamePasswordCredentials credentials = retrieveCredentials(run);
 
         UForgeLauncher uForgeLauncher = new UForgeLauncher(run, workspace, launcher, listener);
         uForgeLauncher.init(envAction);
@@ -100,10 +111,10 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         InstallStep installStep = new InstallStep(uForgeLauncher, version);
         installStep.perform();
 
-        CreateStep createStep = new CreateStep(uForgeLauncher, url, login, password, templatePath);
+        CreateStep createStep = new CreateStep(uForgeLauncher, url, credentials, templatePath);
         createStep.perform();
 
-        GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, login, password, templatePath);
+        GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, credentials, templatePath);
         generateStep.perform();
 
         run.addAction(envAction);
@@ -111,6 +122,13 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
 
     @Extension @Symbol("uforge")
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+
+        private FormValidation doCheckField(@QueryParameter String value) {
+            if (value.isEmpty()) {
+                return FormValidation.error(Messages.UForgeBuilder_DescriptorImpl_errors_missingField());
+            }
+            return FormValidation.ok();
+        }
 
         public FormValidation doCheckUrl(@QueryParameter String value) {
             return doCheckField(value);
@@ -120,23 +138,52 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
             return doCheckField(value);
         }
 
-        public FormValidation doCheckLogin(@QueryParameter String value) {
-            return doCheckField(value);
-        }
-
-        public FormValidation doCheckPassword(@QueryParameter String value) {
-            return doCheckField(value);
+        public FormValidation doCheckCredentialsId(@AncestorInPath Item context, @QueryParameter String value) {
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
+            if (jenkins == null) {
+                return FormValidation.ok();
+            }
+            // comes from the consumer documentation of the credentials plugin
+            if (context == null) {
+                if (!jenkins.hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok();
+                }
+            } else {
+                if (!context.hasPermission(Item.EXTENDED_READ)
+                        && !context.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return FormValidation.ok();
+                }
+            }
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.error(Messages.UForgeBuilder_DescriptorImpl_errors_missingField());
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckTemplatePath(@QueryParameter String value) {
             return doCheckField(value);
         }
 
-        private FormValidation doCheckField(@QueryParameter String value) {
-            if (value.isEmpty()) {
-                return FormValidation.error(Messages.UForgeBuilder_DescriptorImpl_errors_missingField());
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item context, @QueryParameter String credentialsId) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
+            if (jenkins == null) {
+                return result;
             }
-            return FormValidation.ok();
+            // comes from the consumer documentation of the credentials plugin
+            if (context == null) {
+                if (!jenkins.hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
+            } else {
+                if (!context.hasPermission(Item.EXTENDED_READ)
+                        && !context.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(credentialsId);
+                }
+            }
+            return result
+                    .includeAs(ACL.SYSTEM, jenkins, StandardUsernamePasswordCredentials.class)
+                    .includeCurrentValue(credentialsId);
         }
 
         @Override
