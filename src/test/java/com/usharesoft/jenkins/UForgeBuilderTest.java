@@ -4,7 +4,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -49,16 +49,12 @@ public class UForgeBuilderTest {
     @Test
     public void should_builder_builds_successfully_in_freestyle_project() throws Exception {
         // given
-        String script = "echo UForge AppCenter plugin";
-        doReturn(script).when(builder).createScript(any());
+        doNothing().when(builder).perform(any(), any(), any(), any());
         FreeStyleProject project = jenkins.createFreeStyleProject();
         project.getBuildersList().add(builder);
 
-        // when
+        // when // then
         FreeStyleBuild build = jenkins.buildAndAssertSuccess(project);
-
-        // then
-        jenkins.assertLogContains("UForge AppCenter plugin", build);
     }
 
     @Test

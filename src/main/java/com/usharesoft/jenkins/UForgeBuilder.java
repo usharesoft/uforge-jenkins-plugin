@@ -1,23 +1,29 @@
 package com.usharesoft.jenkins;
 
-import hudson.AbortException;
-import hudson.Launcher;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Util;
-import hudson.util.FormValidation;
-import hudson.model.AbstractProject;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.tasks.Builder;
-import hudson.tasks.BuildStepDescriptor;
+import com.usharesoft.jenkins.launcher.UForgeLauncher;
+import com.usharesoft.jenkins.steps.CreateStep;
+import com.usharesoft.jenkins.steps.GenerateStep;
+import com.usharesoft.jenkins.steps.InstallStep;
+
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
 import java.io.PrintStream;
+
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.Util;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.FormValidation;
 import jenkins.tasks.SimpleBuildStep;
-import org.jenkinsci.Symbol;
 
 public class UForgeBuilder extends Builder implements SimpleBuildStep {
     private final String url;
@@ -82,29 +88,25 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private String escapeDoublesQuotes(String string) {
-        return string.replace("\"", "\\\"");
-    }
-
-    String createScript(FilePath workspace) {
-        String hammrWorkspace = workspace + "/hammr";
-        String escapedPassword = escapeDoublesQuotes(password);
-
-        return new UForgeScript(url, version, login, escapedPassword, templatePath, hammrWorkspace).getScript();
-    }
-
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         checkParameters(listener.getLogger());
 
-        UForgeEnvironmentVariables uForgeEnvVars = new UForgeEnvironmentVariables();
-        String script = createScript(workspace);
-        UForgeLauncher scriptLauncher = new UForgeLauncher(run, workspace, launcher, listener, uForgeEnvVars);
-        scriptLauncher.launchScript(script);
+        UForgeEnvironmentVariables envAction = new UForgeEnvironmentVariables();
 
-        if (uForgeEnvVars != null) {
-            run.addAction(uForgeEnvVars);
-        }
+        UForgeLauncher uForgeLauncher = new UForgeLauncher(workspace, launcher, listener);
+        uForgeLauncher.init(envAction);
+
+        InstallStep installStep = new InstallStep(uForgeLauncher, version);
+        installStep.perform();
+
+        CreateStep createStep = new CreateStep(uForgeLauncher, url, login, password, templatePath);
+        createStep.perform();
+
+        GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, login, password, templatePath);
+        generateStep.perform();
+
+        run.addAction(envAction);
     }
 
     @Extension @Symbol("uforge")
