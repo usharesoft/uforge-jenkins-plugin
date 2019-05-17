@@ -94,7 +94,7 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
 
         UForgeEnvironmentVariables envAction = new UForgeEnvironmentVariables();
 
-        UForgeLauncher uForgeLauncher = new UForgeLauncher(workspace, launcher, listener);
+        UForgeLauncher uForgeLauncher = new UForgeLauncher(run, workspace, launcher, listener);
         uForgeLauncher.init(envAction);
 
         InstallStep installStep = new InstallStep(uForgeLauncher, version);
