@@ -9,7 +9,7 @@
 
     <groupId>com.usharesoft.jenkins</groupId>
     <artifactId>uforge-appcenter</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>hpi</packaging>
     <properties>
         <jenkins.version>2.150.2</jenkins.version>
@@ -30,7 +30,7 @@
         <connection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</connection>
         <url>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</url>
         <developerConnection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</developerConnection>
-        <tag>HEAD</tag>
+        <tag>0.1.0</tag>
     </scm>
 
     <dependencies>
