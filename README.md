@@ -39,15 +39,16 @@ This build step takes parameters:
 
 - `UForge API URL<String>`: URL of the UForge server
 - `UForge version<String>`: version of the UForge server
-- `UForge login<String>`: login of the UForge account
-- `UForge password<Password>`: password of the UForge account
+- `UForge credentials<Username with password>`: credentials of the UForge account
 - `Template path<String>`: path to the YAML or JSON template
 
 ### Pipeline
 The build step is also compatible with pipeline and is called like this:
 ```
-uforge url: <UFORGE_URL>, version: <VERSION>, login: <LOGIN>, password: <PASSWORD>, templatePath: <TEMPLATE_PATH>
+uforge url: <UFORGE_URL>, version: <VERSION>, credentialsId: <CREDENTIALS_ID>, templatePath: <TEMPLATE_PATH>
 ```
+
+__Note__:`credentialsId` parameter is the id of a Jenkins credentials `Username with password`.
 
 ### Environment variables
 The build step will fill these environment variables:
