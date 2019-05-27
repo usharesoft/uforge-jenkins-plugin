@@ -11,11 +11,14 @@ import hudson.model.EnvironmentContributingAction;
 import hudson.model.Run;
 
 public class UForgeEnvironmentVariables implements EnvironmentContributingAction {
-
     private Map<String,String> envVars = new HashMap<>();
 
     public void addEnvVar(String key, String value) {
         envVars.put(key, value);
+    }
+
+    public String getEnvVar(String key) {
+        return envVars.get(key);
     }
 
     @Override
