@@ -1,7 +1,7 @@
 # UForge AppCenter Jenkins Plugin
 This plugin integrates UForge AppCenter with Jenkins.
 It allows you to perform actions on a UForge server from a Jenkins pipeline or a Freestyle Job.
-It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create and generate UForge appliances.
+It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create, generate and publish UForge appliances.
 
 ## Prerequisite
 - The plugin requires at least Jenkins version 2.150.2 to work.
@@ -14,7 +14,7 @@ It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create and generate 
 
 ## Usage
 This plugin provides a Jenkins build step that takes a template file describing a machine image.
-This image is built and generated onto a UForge AppCenter server.
+This image is built and generated onto a UForge AppCenter server. Then it can be published to a chosen cloud environment or container.
 
 __warnings__:
 The Jenkins plugin currently has the following limitations, due to underlying Hammr issues:
@@ -22,13 +22,13 @@ The Jenkins plugin currently has the following limitations, due to underlying Ha
 - If a generation for the same template and image format is ongoing when the job launches the generation, the generation fails but the job appears successful.
 
 ### Template file
-The template file describes the machine image that the plugin will create and generate.
+The template file describes the machine image that the plugin will create, generate and publish if needed.
 It is written in YAML or JSON format.
 
 The template contains a `stack` section that describes the machine image.
 See http://docs.usharesoft.com/projects/hammr/en/latest/pages/templates/template-create.html for more information.
 
-It also contains a `builders` section that describes one or many targets for the generation.
+It also contains a `builders` section that describes one or many targets for the generation. If you want your image to be published, you need to add an `account` in the `builders` section and other information depending of the publish target.
 See http://docs.usharesoft.com/projects/hammr/en/latest/pages/machine-images/builders/overview.html for more information.
 
 You need to make this template file accessible for the UForge AppCenter Plugin build step.
@@ -54,6 +54,9 @@ __Note__:`credentialsId` parameter is the id of a Jenkins credentials `Username 
 The build step will fill these environment variables:
 - `UFORGE_APPLIANCE_ID` : id of the created appliance
 - `UFORGE_IMAGE_ID`: id of the generated image
+
+If the image is published, this variable will be set as well:
+- `UFORGE_CLOUD_ID`: id of the registered machine image in the cloud provider (if available)
 
 ## Release process
 This section describes the process to release the UForge AppCenter Jenkins plugin
