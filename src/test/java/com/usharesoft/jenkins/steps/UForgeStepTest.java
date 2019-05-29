@@ -39,6 +39,6 @@ public class UForgeStepTest {
         createStep.printStep(message);
 
         //then
-        verify(launcher).launch(any() , eq(true));
+        verify(launcher).launch(any(), eq(true));
     }
 }

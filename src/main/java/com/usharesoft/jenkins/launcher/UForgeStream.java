@@ -11,14 +11,21 @@ import java.util.regex.Pattern;
 
 public class UForgeStream extends FilterOutputStream {
     private UForgeEnvironmentVariables uForgeEnvVars;
+    private boolean quiet = false;
 
     UForgeStream(OutputStream out, UForgeEnvironmentVariables uForgeEnvVars) {
         super(out);
         this.uForgeEnvVars = uForgeEnvVars;
     }
 
+    public void setQuiet(boolean quiet) {
+        this.quiet = quiet;
+    }
+
     public void println(String x) {
-        ((PrintStream) out).println(x);
+        if (!quiet) {
+            ((PrintStream) out).println(x);
+        }
     }
 
     @Override
@@ -31,6 +38,7 @@ public class UForgeStream extends FilterOutputStream {
             println(line);
             fillApplianceIdEnvVar(line);
             fillImageIdEnvVar(line);
+            fillRegisteringNameEnvVar(line);
             fillCloudIdEnvVar(line);
         }
     }
@@ -52,6 +60,14 @@ public class UForgeStream extends FilterOutputStream {
         Matcher m = r.matcher(line);
         if (m.find()) {
             uForgeEnvVars.addEnvVar("UFORGE_IMAGE_ID", m.group(1));
+        }
+    }
+
+    void fillRegisteringNameEnvVar(String line) {
+        Pattern r = Pattern.compile("^\\|\\s+RegisteringName\\s+\\|\\s+(\\S+)\\s+\\|$");
+        Matcher m = r.matcher(line);
+        if (m.find()) {
+            uForgeEnvVars.addEnvVar("UFORGE_IMAGE_REGISTERING_NAME", m.group(1));
         }
     }
 
