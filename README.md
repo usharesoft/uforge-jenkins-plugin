@@ -54,6 +54,7 @@ __Note__:`credentialsId` parameter is the id of a Jenkins credentials `Username 
 The build step will fill these environment variables:
 - `UFORGE_APPLIANCE_ID` : id of the created appliance
 - `UFORGE_IMAGE_ID`: id of the generated image
+- `UFORGE_IMAGE_REGISTERING_NAME`: registering name of the image in the internal registry (in case of Docker or OpenShift generation)
 
 If the image is published, this variable will be set as well:
 - `UFORGE_CLOUD_ID`: id of the registered machine image in the cloud provider (if available)
