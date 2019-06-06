@@ -16,36 +16,36 @@ import static org.testng.AssertJUnit.assertEquals;
 public class UForgeTemplateTest {
     private static final String FILE = "template.yml";
     private static final FilePath WORKSPACE = new FilePath(new File("/workspace"));
+    private static final FilePath ABSOLUTE_PATH = new FilePath(new File("/workspace/template.yml"));
 
     private UForgeTemplate uForgetemplate;
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp() throws IOException, InterruptedException {
         uForgetemplate = spy(new UForgeTemplate(FILE, WORKSPACE));
     }
 
     @Test
-    public void should_getAbsolutePath_create_absolute_path() throws IOException, InterruptedException {
+    public void should_getAbsoluteFilePath_create_absolute_path() throws IOException, InterruptedException {
         // given
-        String expectedPath = "/workspace/template.yml";
 
         // when
-        String path = uForgetemplate.getAbsolutePath(FILE, WORKSPACE);
+        FilePath path = uForgetemplate.getAbsoluteFilePath(FILE, WORKSPACE);
 
         //then
-        assertEquals(expectedPath, path);
+        assertEquals(ABSOLUTE_PATH, path);
     }
 
     @Test
     public void should_createTemplateReader_return_YAMLReader_for_yml_file() throws IOException, InterruptedException {
         // given
-        doReturn(FILE).when(uForgetemplate).getAbsolutePath(any(), any());
+        doReturn(ABSOLUTE_PATH).when(uForgetemplate).getAbsoluteFilePath(any(), any());
 
         // when
         TemplateReader newReader = uForgetemplate.createTemplateReader(FILE, WORKSPACE);
 
         //then
-        verify(uForgetemplate).getAbsolutePath(FILE, WORKSPACE);
+        verify(uForgetemplate).getAbsoluteFilePath(FILE, WORKSPACE);
         assertEquals(YAMLReader.class, newReader.getClass());
     }
 }

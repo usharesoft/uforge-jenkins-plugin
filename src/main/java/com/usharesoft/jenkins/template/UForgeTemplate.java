@@ -10,28 +10,31 @@ import hudson.FilePath;
 public class UForgeTemplate {
     private TemplateReader templateReader;
 
-    public UForgeTemplate(String filePath, FilePath workspace) {
+    public UForgeTemplate(String filePath, FilePath workspace) throws IOException, InterruptedException {
         templateReader = createTemplateReader(filePath, workspace);
     }
 
-    String getAbsolutePath(String filePath, FilePath workspace) {
+    FilePath getAbsoluteFilePath(String filePath, FilePath workspace) throws IOException, InterruptedException {
         File file = new File(filePath);
-        if (!file.isAbsolute()) {
-            return workspace + "/" + filePath;
+        String relativeFilePath = filePath;
+
+        if (file.isAbsolute()) {
+            relativeFilePath = workspace.toURI().relativize(file.toURI()).getPath();
         }
-        return filePath;
+
+        return new FilePath(workspace, relativeFilePath.trim());
     }
 
-    TemplateReader createTemplateReader(String filePath, FilePath workspace) {
-        String absoluteFilePath = getAbsolutePath(filePath, workspace);
+    TemplateReader createTemplateReader(String filePath, FilePath workspace) throws IOException, InterruptedException {
+        FilePath absoluteFilePath = getAbsoluteFilePath(filePath, workspace);
 
-        if ("yml".equals(Files.getFileExtension(absoluteFilePath))) {
+        if ("yml".equals(Files.getFileExtension(absoluteFilePath.getName()))) {
             return new YAMLReader(absoluteFilePath);
         }
         return new JSONReader(absoluteFilePath);
     }
 
-    public boolean canPublish() throws IOException {
+    public boolean canPublish() throws IOException, InterruptedException {
         return templateReader.hasAccountSection();
     }
 }

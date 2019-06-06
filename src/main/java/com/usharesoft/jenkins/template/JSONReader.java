@@ -1,7 +1,5 @@
 package com.usharesoft.jenkins.template;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -11,16 +9,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import hudson.FilePath;
+
 public class JSONReader extends TemplateReader {
 
-    public JSONReader(String file) {
+    public JSONReader(FilePath file) {
         super(file);
     }
 
-    JSONObject readJSONFile() throws IOException {
+    JSONObject readJSONFile() throws InterruptedException, IOException {
         JSONParser jsonParser = new JSONParser();
 
-        try (Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8")) {
+        try (Reader reader = new InputStreamReader(file.read(), "UTF-8")) {
             return (JSONObject) jsonParser.parse(reader);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -29,13 +29,10 @@ public class JSONReader extends TemplateReader {
     }
 
     @Override
-    public boolean hasAccountSection() throws IOException {
+    public boolean hasAccountSection() throws IOException, InterruptedException {
         JSONObject template = readJSONFile();
-        if (template == null) {
-            return false;
-        }
 
-        if (template.containsKey("builders")) {
+        if (template != null && template.containsKey("builders")) {
             JSONArray builders = (JSONArray) template.get("builders");
             for (Object builder : builders) {
                 if (((JSONObject) builder).containsKey("account")) {

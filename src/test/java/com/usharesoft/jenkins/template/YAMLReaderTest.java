@@ -29,7 +29,7 @@ public class YAMLReaderTest {
     }
 
     @Test
-    public void should_hasAccountSection_read_yaml_file() throws IOException {
+    public void should_hasAccountSection_read_yaml_file() throws IOException, InterruptedException {
         // given
         doReturn(template).when(yamlReader).readYAMLFile();
         doReturn(false).when(template).containsKey("builders");
