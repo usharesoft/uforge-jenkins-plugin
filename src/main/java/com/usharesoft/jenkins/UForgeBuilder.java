@@ -6,6 +6,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
+import com.usharesoft.jenkins.steps.InfoStep;
 import com.usharesoft.jenkins.steps.InstallStep;
 import com.usharesoft.jenkins.steps.CreateStep;
 import com.usharesoft.jenkins.steps.GenerateStep;
@@ -119,6 +120,12 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
 
         GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, credentials, templatePath);
         generateStep.perform();
+
+        String imageId = envAction.getEnvVar("UFORGE_IMAGE_ID");
+        if (!imageId.isEmpty()) {
+            InfoStep infoStep = new InfoStep(uForgeLauncher, url, credentials, imageId);
+            infoStep.perform();
+        }
 
         if (uForgeTemplate.canPublish()) {
             PublishStep publishStep = new PublishStep(uForgeLauncher, url, credentials, templatePath);

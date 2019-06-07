@@ -33,16 +33,22 @@ public class UForgeLauncher {
         return scriptWorkspace;
     }
 
-    public void launch(ArgumentListBuilder command, boolean quiet) throws InterruptedException, IOException {
-        if (0 != launcher.launch().cmds(command).stdout(logger).pwd(jobWorkspace).envs(run.getEnvironment(listener)).quiet(quiet).join()) {
+    public void launch(ArgumentListBuilder command, boolean hideCommand) throws InterruptedException, IOException {
+        if (0 != launcher.launch().cmds(command).stdout(logger).pwd(jobWorkspace).envs(run.getEnvironment(listener)).quiet(hideCommand).join()) {
             throw new AbortException(Messages.Logs_errors_scriptFailure());
         }
     }
 
-    public void launchInstall(ArgumentListBuilder command, boolean quiet) throws InterruptedException, IOException {
-        if (0 != launcher.launch().cmds(command).pwd(jobWorkspace).envs(run.getEnvironment(listener)).quiet(quiet).join()) {
+    public void launchInstall(ArgumentListBuilder command, boolean hideCommand) throws InterruptedException, IOException {
+        if (0 != launcher.launch().cmds(command).pwd(jobWorkspace).envs(run.getEnvironment(listener)).quiet(hideCommand).join()) {
             throw new AbortException(Messages.Logs_errors_scriptFailure());
         }
+    }
+
+    public void launchWithoutLogs(ArgumentListBuilder command) throws InterruptedException, IOException {
+        logger.setQuiet(true);
+        launch(command, true);
+        logger.setQuiet(false);
     }
 
     public void init(UForgeEnvironmentVariables uForgeEnvVars) throws InterruptedException, IOException {
