@@ -6,7 +6,7 @@ It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create, generate and
 ## Prerequisite
 - The plugin requires at least Jenkins version 2.150.2 to work.
 - `pip`,`virtualenv` and `python2.7` need to be installed on the executor.
-- You also need a running UForge AppCenter server (minimum version: 3.8.12).
+- You also need a running UForge AppCenter server (minimum version: 3.8.13).
 
 ## Build from source
 * `mvn install` builds the plugin. This will create the file `./target/uforge.hpi` that you can deploy to Jenkins.
@@ -15,11 +15,6 @@ It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create, generate and
 ## Usage
 This plugin provides a Jenkins build step that takes a template file describing a machine image.
 This image is built and generated onto a UForge AppCenter server. Then it can be published to a chosen cloud environment or container.
-
-__warnings__:
-The Jenkins plugin currently has the following limitations, due to underlying Hammr issues:
-- If an appliance with the same name and version already exists on the UForge AppCenter server, the job will not fail and will generate an image for the pre-existing appliance (and not for the one provided in the template file).
-- If a generation for the same template and image format is ongoing when the job launches the generation, the generation fails but the job appears successful.
 
 ### Template file
 The template file describes the machine image that the plugin will create, generate and publish if needed.
