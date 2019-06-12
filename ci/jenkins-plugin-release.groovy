@@ -10,7 +10,7 @@ pipeline {
         stage('Release Plugin') {
             steps {
                 script {
-                    sshagent(['gerrit']) {
+                    sshagent(['github-usharesoft-ci']) {
                         sh 'mvn release:prepare release:perform -DreleaseVersion=${VERSION} -DdevelopmentVersion=${NEXT_VERSION}-SNAPSHOT -Dtag=${VERSION}'
                     }
                 }
