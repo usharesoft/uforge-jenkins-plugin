@@ -8,6 +8,10 @@ It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create, generate and
 - `pip`,`virtualenv` and `python2.7` need to be installed on the executor.
 - You also need a running UForge AppCenter server (minimum version: 3.8.13).
 
+
+## Installation
+You can download `uforge-appcenter-X.X.X.hpi` file on `https://maven.usharesoft.com/nexus/content/repositories/official/com/usharesoft/jenkins/uforge-appcenter/` and install it manually in your Jenkins instance.
+
 ## Build from source
 * `mvn install` builds the plugin. This will create the file `./target/uforge.hpi` that you can deploy to Jenkins.
 * `mvn hpi:run` runs Jenkins with the current plugin project. You can access the running Jenkins instance at `localhost:8080/jenkins`
