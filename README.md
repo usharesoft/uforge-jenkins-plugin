@@ -55,7 +55,8 @@ The build step will fill these environment variables:
 - `UFORGE_IMAGE_ID`: id of the generated image
 - `UFORGE_IMAGE_REGISTERING_NAME`: registering name of the image in the internal registry (in case of Docker or OpenShift generation)
 
-If the image is published, this variable will be set as well:
+If the image is published, these variables will be set as well:
+- `UFORGE_PUBLISH_ID`: id of the published image in the UForge server
 - `UFORGE_CLOUD_ID`: id of the registered machine image in the cloud provider (if available)
 
 ## Release process

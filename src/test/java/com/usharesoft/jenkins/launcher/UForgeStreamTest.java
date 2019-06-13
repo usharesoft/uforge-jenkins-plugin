@@ -72,6 +72,30 @@ public class UForgeStreamTest {
     }
 
     @Test
+    public void should_fillPublishIdEnvVar_add_env_var() {
+        // given
+        doNothing().when(uForgeEnvironmentVariables).addEnvVar(anyString(), anyString());
+
+        // when
+        uForgeStream.fillPublishIdEnvVar("Publish ID : 1234");
+
+        // then
+        verify(uForgeEnvironmentVariables).addEnvVar("UFORGE_PUBLISH_ID", "1234");
+    }
+
+    @Test
+    public void should_fillRegisteringNameEnvVar_add_env_var() {
+        // given
+        doNothing().when(uForgeEnvironmentVariables).addEnvVar(anyString(), anyString());
+
+        // when
+        uForgeStream.fillRegisteringNameEnvVar("| RegisteringName   |  abcd-1234   |");
+
+        // then
+        verify(uForgeEnvironmentVariables).addEnvVar("UFORGE_IMAGE_REGISTERING_NAME", "abcd-1234");
+    }
+
+    @Test
     public void should_fillCloudIdEnvVar_add_env_var() {
         // given
         doNothing().when(uForgeEnvironmentVariables).addEnvVar(anyString(), anyString());
