@@ -42,13 +42,15 @@ public class InstallStepTest {
         FieldSetter.setField(installStep, InstallStep.class.getDeclaredField("version"), VERSION);
         FieldSetter.setField(installStep, UForgeStep.class.getDeclaredField("launcher"), launcher);
 
-        doReturn(new FilePath(new File("workspace"))).when(launcher).getScriptWorkspace();
+        doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
     }
 
     @Test
     public void should_perform_launch_install_commands() throws IOException, InterruptedException {
         // given
-        doReturn(args).when(installStep).getInstallVenvCmd();
+        doReturn(args).when(installStep).getDownloadVenvCmd();
+        doReturn(args).when(installStep).getExtractVenvCmd();
+        doReturn(args).when(installStep).getInitVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
         doNothing().when(installStep).printStep(any());
 
@@ -57,21 +59,54 @@ public class InstallStepTest {
 
         //then
         verify(installStep).printStep(any());
-        verify(installStep).getInstallVenvCmd();
+        verify(installStep).getDownloadVenvCmd();
+        verify(installStep).getExtractVenvCmd();
+        verify(installStep).getInitVenvCmd();
         verify(installStep).getInstallHammrCmd();
-        verify(launcher, times(2)).launchInstall(eq(args), eq(true));
+        verify(launcher, times(4)).launchInstall(eq(args), eq(true));
     }
 
     @Test
-    public void should_getInstallVenvCmd_return_good_command() {
+    public void should_getDownloadVenvCmd_return_good_command() {
         // given
         ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
-        expectedArgs.add("virtualenv");
-        expectedArgs.add("--python=python2.7");
-        expectedArgs.add(launcher.getScriptWorkspace());
+        expectedArgs.add("curl");
+        expectedArgs.add("--location");
+        expectedArgs.add("--output").add("virtualenv.tar.gz");
+        expectedArgs.add("https://github.com/pypa/virtualenv/tarball/12.0.7");
 
         // when
-        ArgumentListBuilder args = installStep.getInstallVenvCmd();
+        ArgumentListBuilder args = installStep.getDownloadVenvCmd();
+
+        //then
+        assertEquals(expectedArgs.toString(), args.toString());
+    }
+
+    @Test
+    public void should_getExtractVenvCmd_return_good_command() {
+        // given
+        ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
+        expectedArgs.add("tar");
+        expectedArgs.add("xvfz");
+        expectedArgs.add("virtualenv.tar.gz");
+
+        // when
+        ArgumentListBuilder args = installStep.getExtractVenvCmd();
+
+        //then
+        assertEquals(expectedArgs.toString(), args.toString());
+    }
+
+    @Test
+    public void should_getInitVenvCmd_return_good_command() {
+        // given
+        ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
+        expectedArgs.add("python2.7");
+        expectedArgs.add("pypa-virtualenv-5921a37/virtualenv.py");
+        expectedArgs.add(launcher.getVenvDirectory());
+
+        // when
+        ArgumentListBuilder args = installStep.getInitVenvCmd();
 
         //then
         assertEquals(expectedArgs.toString(), args.toString());
@@ -81,7 +116,7 @@ public class InstallStepTest {
     public void should_getInstallHammrCmd_return_good_command() {
         // given
         ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
-        expectedArgs.add(launcher.getScriptWorkspace() + "/bin/python2.7");
+        expectedArgs.add(launcher.getVenvDirectory() + "/bin/python2.7");
         expectedArgs.add("-m");
         expectedArgs.add("pip");
         expectedArgs.add("install");

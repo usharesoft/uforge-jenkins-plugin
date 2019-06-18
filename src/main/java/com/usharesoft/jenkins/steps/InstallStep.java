@@ -18,22 +18,43 @@ public class InstallStep extends UForgeStep {
     @Override
     public void perform() throws InterruptedException, IOException {
         printStep(Messages.Logs_steps_install());
-        launcher.launchInstall(getInstallVenvCmd(), true);
+        launcher.launchInstall(getDownloadVenvCmd(), true);
+        launcher.launchInstall(getExtractVenvCmd(), true);
+        launcher.launchInstall(getInitVenvCmd(), true);
         launcher.launchInstall(getInstallHammrCmd(), true);
     }
 
-    ArgumentListBuilder getInstallVenvCmd() {
+    ArgumentListBuilder getDownloadVenvCmd() {
         ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add("virtualenv");
-        args.add("--python=python2.7");
-        args.add(launcher.getScriptWorkspace());
+        args.add("curl");
+        args.add("--location");
+        args.add("--output").add("virtualenv.tar.gz");
+        args.add("https://github.com/pypa/virtualenv/tarball/12.0.7");
+
+        return args;
+    }
+
+    ArgumentListBuilder getExtractVenvCmd() {
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add("tar");
+        args.add("xvfz");
+        args.add("virtualenv.tar.gz");
+
+        return args;
+    }
+
+    ArgumentListBuilder getInitVenvCmd() {
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add("python2.7");
+        args.add("pypa-virtualenv-5921a37/virtualenv.py");
+        args.add(launcher.getVenvDirectory());
 
         return args;
     }
 
     ArgumentListBuilder getInstallHammrCmd() {
         ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add(launcher.getScriptWorkspace() + "/bin/python2.7");
+        args.add(launcher.getVenvDirectory() + "/bin/python2.7");
         args.add("-m");
         args.add("pip");
         args.add("install");

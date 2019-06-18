@@ -19,6 +19,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
@@ -93,6 +94,17 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
+    FilePath getAbsoluteFilePath(String filePath, FilePath workspace) throws IOException, InterruptedException {
+        File file = new File(filePath);
+        String relativeFilePath = filePath;
+
+        if (file.isAbsolute()) {
+            relativeFilePath = workspace.toURI().relativize(file.toURI()).getPath();
+        }
+
+        return new FilePath(workspace, relativeFilePath.trim());
+    }
+
     StandardUsernamePasswordCredentials retrieveCredentials(Run<?, ?> run) throws AbortException {
         StandardUsernamePasswordCredentials credentials = CredentialsProvider.findCredentialById(credentialsId, StandardUsernamePasswordCredentials.class, run, Collections.<DomainRequirement>emptyList());
         if (credentials == null) {
@@ -105,20 +117,22 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
     public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
         checkParameters(listener.getLogger());
 
+        FilePath absoluteTemplatePath = getAbsoluteFilePath(templatePath, workspace);
+
         UForgeEnvironmentVariables envAction = new UForgeEnvironmentVariables();
         StandardUsernamePasswordCredentials credentials = retrieveCredentials(run);
-        UForgeTemplate uForgeTemplate = new UForgeTemplate(templatePath, workspace);
+        UForgeTemplate uForgeTemplate = new UForgeTemplate(absoluteTemplatePath);
 
-        UForgeLauncher uForgeLauncher = new UForgeLauncher(run, workspace, launcher, listener);
+        UForgeLauncher uForgeLauncher = new UForgeLauncher(run, workspace.child("uforge"), launcher, listener);
         uForgeLauncher.init(envAction);
 
         InstallStep installStep = new InstallStep(uForgeLauncher, version);
         installStep.perform();
 
-        CreateStep createStep = new CreateStep(uForgeLauncher, url, credentials, templatePath);
+        CreateStep createStep = new CreateStep(uForgeLauncher, url, credentials, absoluteTemplatePath);
         createStep.perform();
 
-        GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, credentials, templatePath);
+        GenerateStep generateStep = new GenerateStep(uForgeLauncher, url, credentials, absoluteTemplatePath);
         generateStep.perform();
 
         String imageId = envAction.getEnvVar("UFORGE_IMAGE_ID");
@@ -128,7 +142,7 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
 
         if (uForgeTemplate.canPublish()) {
-            PublishStep publishStep = new PublishStep(uForgeLauncher, url, credentials, templatePath);
+            PublishStep publishStep = new PublishStep(uForgeLauncher, url, credentials, absoluteTemplatePath);
             publishStep.perform();
         }
 
