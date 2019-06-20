@@ -27,9 +27,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</connection>
-        <url>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</url>
-        <developerConnection>scm:git:ssh://jenkins@gerrit.usharesoft.com/uforge-plugin</developerConnection>
+        <connection>scm:git:ssh://git@github.com:usharesoft/uforge-jenkins-plugin.git</connection>
+        <url>scm:git:ssh://git@github.com:usharesoft/uforge-jenkins-plugin.git</url>
+        <developerConnection>scm:git:ssh://git@github.com:usharesoft/uforge-jenkins-plugin.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
