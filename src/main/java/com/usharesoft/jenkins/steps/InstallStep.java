@@ -29,7 +29,7 @@ public class InstallStep extends UForgeStep {
         args.add("curl");
         args.add("--location");
         args.add("--output").add("virtualenv.tar.gz");
-        args.add("https://github.com/pypa/virtualenv/tarball/12.0.7");
+        args.add("https://github.com/pypa/virtualenv/tarball/16.6.1");
 
         return args;
     }
@@ -46,7 +46,7 @@ public class InstallStep extends UForgeStep {
     ArgumentListBuilder getInitVenvCmd() {
         ArgumentListBuilder args = new ArgumentListBuilder();
         args.add("python2.7");
-        args.add("pypa-virtualenv-5921a37/virtualenv.py");
+        args.add("pypa-virtualenv-ce9343c/virtualenv.py");
         args.add(launcher.getVenvDirectory());
 
         return args;

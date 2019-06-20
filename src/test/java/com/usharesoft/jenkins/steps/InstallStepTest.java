@@ -73,7 +73,7 @@ public class InstallStepTest {
         expectedArgs.add("curl");
         expectedArgs.add("--location");
         expectedArgs.add("--output").add("virtualenv.tar.gz");
-        expectedArgs.add("https://github.com/pypa/virtualenv/tarball/12.0.7");
+        expectedArgs.add("https://github.com/pypa/virtualenv/tarball/16.6.1");
 
         // when
         ArgumentListBuilder args = installStep.getDownloadVenvCmd();
@@ -102,7 +102,7 @@ public class InstallStepTest {
         // given
         ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
         expectedArgs.add("python2.7");
-        expectedArgs.add("pypa-virtualenv-5921a37/virtualenv.py");
+        expectedArgs.add("pypa-virtualenv-ce9343c/virtualenv.py");
         expectedArgs.add(launcher.getVenvDirectory());
 
         // when
