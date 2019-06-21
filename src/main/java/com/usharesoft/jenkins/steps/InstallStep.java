@@ -3,7 +3,11 @@ package com.usharesoft.jenkins.steps;
 import com.usharesoft.jenkins.Messages;
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import hudson.util.ArgumentListBuilder;
 
@@ -18,20 +22,22 @@ public class InstallStep extends UForgeStep {
     @Override
     public void perform() throws InterruptedException, IOException {
         printStep(Messages.Logs_steps_install());
-        launcher.launchInstall(getDownloadVenvCmd(), true);
+        downloadVirtualenv();
         launcher.launchInstall(getExtractVenvCmd(), true);
         launcher.launchInstall(getInitVenvCmd(), true);
         launcher.launchInstall(getInstallHammrCmd(), true);
     }
 
-    ArgumentListBuilder getDownloadVenvCmd() {
-        ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add("curl");
-        args.add("--location");
-        args.add("--output").add("virtualenv.tar.gz");
-        args.add("https://github.com/pypa/virtualenv/tarball/16.6.1");
-
-        return args;
+    void downloadVirtualenv() {
+        try {
+            FileUtils.copyURLToFile(
+                    new URL("https://github.com/pypa/virtualenv/tarball/16.6.1"),
+                    new File(launcher.getWorkspace() + "/virtualenv.tar.gz"),
+                    1000,
+                    1000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     ArgumentListBuilder getExtractVenvCmd() {

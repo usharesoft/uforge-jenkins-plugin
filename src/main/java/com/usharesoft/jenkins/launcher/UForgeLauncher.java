@@ -33,6 +33,10 @@ public class UForgeLauncher {
         return venvDirectory;
     }
 
+    public FilePath getWorkspace() {
+        return workspace;
+    }
+
     public void launch(ArgumentListBuilder command, boolean hideCommand) throws InterruptedException, IOException {
         if (0 != launcher.launch().cmds(command).stdout(logger).pwd(workspace).envs(run.getEnvironment(listener)).quiet(hideCommand).join()) {
             throw new AbortException(Messages.Logs_errors_scriptFailure());

@@ -48,7 +48,7 @@ public class InstallStepTest {
     @Test
     public void should_perform_launch_install_commands() throws IOException, InterruptedException {
         // given
-        doReturn(args).when(installStep).getDownloadVenvCmd();
+        doNothing().when(installStep).downloadVirtualenv();
         doReturn(args).when(installStep).getExtractVenvCmd();
         doReturn(args).when(installStep).getInitVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
@@ -59,27 +59,11 @@ public class InstallStepTest {
 
         //then
         verify(installStep).printStep(any());
-        verify(installStep).getDownloadVenvCmd();
+        verify(installStep).downloadVirtualenv();
         verify(installStep).getExtractVenvCmd();
         verify(installStep).getInitVenvCmd();
         verify(installStep).getInstallHammrCmd();
-        verify(launcher, times(4)).launchInstall(eq(args), eq(true));
-    }
-
-    @Test
-    public void should_getDownloadVenvCmd_return_good_command() {
-        // given
-        ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
-        expectedArgs.add("curl");
-        expectedArgs.add("--location");
-        expectedArgs.add("--output").add("virtualenv.tar.gz");
-        expectedArgs.add("https://github.com/pypa/virtualenv/tarball/16.6.1");
-
-        // when
-        ArgumentListBuilder args = installStep.getDownloadVenvCmd();
-
-        //then
-        assertEquals(expectedArgs.toString(), args.toString());
+        verify(launcher, times(3)).launchInstall(eq(args), eq(true));
     }
 
     @Test
