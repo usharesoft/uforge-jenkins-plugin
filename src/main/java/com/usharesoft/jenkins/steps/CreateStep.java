@@ -7,12 +7,12 @@ import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
 import java.io.IOException;
 
+import hudson.FilePath;
 import hudson.util.ArgumentListBuilder;
-
 
 public class CreateStep extends HammrStep {
 
-    public CreateStep(UForgeLauncher launcher, String url, StandardUsernamePasswordCredentials credentials, String templatePath) {
+    public CreateStep(UForgeLauncher launcher, String url, StandardUsernamePasswordCredentials credentials, FilePath templatePath) {
         super(launcher, url, credentials, templatePath);
     }
 
@@ -24,7 +24,7 @@ public class CreateStep extends HammrStep {
 
     ArgumentListBuilder getHammrCommand() {
         ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add(launcher.getScriptWorkspace() + "/bin/hammr");
+        args.add(launcher.getVenvDirectory() + "/bin/hammr");
         args.add("template");
         args.add("create");
         args.add("--url").add(url);

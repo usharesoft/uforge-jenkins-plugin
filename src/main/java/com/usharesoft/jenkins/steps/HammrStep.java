@@ -4,12 +4,14 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
+import hudson.FilePath;
+
 public abstract class HammrStep extends UForgeStep {
     String url;
     StandardUsernamePasswordCredentials credentials;
-    String templatePath;
+    FilePath templatePath;
 
-    HammrStep(UForgeLauncher launcher, String url, StandardUsernamePasswordCredentials credentials, String templatePath) {
+    HammrStep(UForgeLauncher launcher, String url, StandardUsernamePasswordCredentials credentials, FilePath templatePath) {
         super(launcher);
         this.url = url;
         this.credentials = credentials;

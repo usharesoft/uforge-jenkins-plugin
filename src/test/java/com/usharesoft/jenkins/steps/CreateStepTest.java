@@ -28,7 +28,7 @@ public class CreateStepTest {
     private static final String URL = "url";
     private static final String LOGIN = "login";
     private static final String PASSWORD = "password";
-    private static final String TEMPLATE = "template";
+    private static final FilePath TEMPLATE = new FilePath(new File("template"));
 
     @Spy
     @InjectMocks
@@ -69,7 +69,7 @@ public class CreateStepTest {
     @Test
     public void should_getHammrCommand_return_good_command() {
         // given
-        doReturn(new FilePath(new File("workspace"))).when(launcher).getScriptWorkspace();
+        doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
         doReturn(LOGIN).when(createStep).getUsername();
         doReturn(PASSWORD).when(createStep).getPassword();
 

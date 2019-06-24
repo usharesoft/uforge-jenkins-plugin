@@ -2,7 +2,6 @@ package com.usharesoft.jenkins.steps;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 
-import com.usharesoft.jenkins.Messages;
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ public class InfoStep extends HammrStep {
 
     ArgumentListBuilder getHammrCommand() {
         ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add(launcher.getScriptWorkspace() + "/bin/hammr");
+        args.add(launcher.getVenvDirectory() + "/bin/hammr");
         args.add("image");
         args.add("info");
         args.add("--url").add(url);
