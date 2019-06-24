@@ -3,9 +3,15 @@ package com.usharesoft.jenkins.steps;
 import com.usharesoft.jenkins.Messages;
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -23,7 +29,7 @@ public class InstallStep extends UForgeStep {
     public void perform() throws InterruptedException, IOException {
         printStep(Messages.Logs_steps_install());
         downloadVirtualenv();
-        launcher.launchInstall(getExtractVenvCmd(), true);
+        decompress(launcher.getWorkspace() + "/virtualenv.tar.gz", new File(launcher.getWorkspace().getRemote()));
         launcher.launchInstall(getInitVenvCmd(), true);
         launcher.launchInstall(getInstallHammrCmd(), true);
     }
@@ -33,20 +39,28 @@ public class InstallStep extends UForgeStep {
             FileUtils.copyURLToFile(
                     new URL("https://github.com/pypa/virtualenv/tarball/16.6.1"),
                     new File(launcher.getWorkspace() + "/virtualenv.tar.gz"),
-                    1000,
-                    1000);
+                    5000,
+                    5000);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    ArgumentListBuilder getExtractVenvCmd() {
-        ArgumentListBuilder args = new ArgumentListBuilder();
-        args.add("tar");
-        args.add("xvfz");
-        args.add("virtualenv.tar.gz");
-
-        return args;
+    void decompress(String in, File out) throws IOException {
+        try (TarArchiveInputStream fin = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(in)))) {
+            TarArchiveEntry entry;
+            while ((entry = fin.getNextTarEntry()) != null) {
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                File curfile = new File(out, entry.getName());
+                File parent = curfile.getParentFile();
+                if (!parent.exists()) {
+                    parent.mkdirs();
+                }
+                IOUtils.copy(fin, new FileOutputStream(curfile));
+            }
+        }
     }
 
     ArgumentListBuilder getInitVenvCmd() {

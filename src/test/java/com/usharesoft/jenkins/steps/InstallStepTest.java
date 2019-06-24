@@ -43,13 +43,14 @@ public class InstallStepTest {
         FieldSetter.setField(installStep, UForgeStep.class.getDeclaredField("launcher"), launcher);
 
         doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
+        doReturn(new FilePath(new File("workspace"))).when(launcher).getWorkspace();
     }
 
     @Test
     public void should_perform_launch_install_commands() throws IOException, InterruptedException {
         // given
         doNothing().when(installStep).downloadVirtualenv();
-        doReturn(args).when(installStep).getExtractVenvCmd();
+        doNothing().when(installStep).decompress(any(), any());
         doReturn(args).when(installStep).getInitVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
         doNothing().when(installStep).printStep(any());
@@ -60,25 +61,10 @@ public class InstallStepTest {
         //then
         verify(installStep).printStep(any());
         verify(installStep).downloadVirtualenv();
-        verify(installStep).getExtractVenvCmd();
+        verify(installStep).decompress(any(), any());
         verify(installStep).getInitVenvCmd();
         verify(installStep).getInstallHammrCmd();
-        verify(launcher, times(3)).launchInstall(eq(args), eq(true));
-    }
-
-    @Test
-    public void should_getExtractVenvCmd_return_good_command() {
-        // given
-        ArgumentListBuilder expectedArgs = new ArgumentListBuilder();
-        expectedArgs.add("tar");
-        expectedArgs.add("xvfz");
-        expectedArgs.add("virtualenv.tar.gz");
-
-        // when
-        ArgumentListBuilder args = installStep.getExtractVenvCmd();
-
-        //then
-        assertEquals(expectedArgs.toString(), args.toString());
+        verify(launcher, times(2)).launchInstall(eq(args), eq(true));
     }
 
     @Test
