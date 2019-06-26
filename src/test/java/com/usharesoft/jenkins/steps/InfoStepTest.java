@@ -65,7 +65,7 @@ public class InfoStepTest {
     @Test
     public void should_getHammrCommand_return_good_command() {
         // given
-        doReturn(new FilePath(new File("workspace"))).when(launcher).getScriptWorkspace();
+        doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
         doReturn(LOGIN).when(infoStep).getUsername();
         doReturn(PASSWORD).when(infoStep).getPassword();
 

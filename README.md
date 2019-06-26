@@ -5,9 +5,13 @@ It uses [Hammr CLI](https://github.com/usharesoft/hammr) to create, generate and
 
 ## Prerequisite
 - The plugin requires at least Jenkins version 2.150.2 to work.
-- `pip`,`virtualenv` and `python2.7` need to be installed on the executor.
+- `python2.7` needs to be installed on the executor.
 - You also need a running UForge AppCenter server (minimum version: 3.8.13).
 
+**Note**: If the "Installation Step" of the plugin fails, you may need to install some more dependencies on your Jenkins executor.
+- On Debian based system: `python-dev, gcc, libxslt1-dev, which`
+- On Red-hat based system: `gcc, python-devel, libxml2-devel, libxslt-devel, which, redhat-rpm-config`
+- On Ubuntu system: `libz-dev`
 
 ## Installation
 You can download `uforge-appcenter-X.X.X.hpi` file on `https://maven.usharesoft.com/nexus/content/repositories/official/com/usharesoft/jenkins/uforge-appcenter/` and install it manually in your Jenkins instance.
