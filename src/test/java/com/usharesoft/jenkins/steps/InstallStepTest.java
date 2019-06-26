@@ -51,12 +51,14 @@ public class InstallStepTest {
         doReturn(args).when(installStep).getInstallVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
         doNothing().when(installStep).printStep(any());
+        doReturn("1234").when(installStep).getUForgeVersion();
 
         // when
         installStep.perform();
 
         //then
         verify(installStep).printStep(any());
+        verify(installStep).getUForgeVersion();
         verify(installStep).getInstallVenvCmd();
         verify(installStep).getInstallHammrCmd();
         verify(launcher, times(2)).launchInstall(eq(args), eq(true));

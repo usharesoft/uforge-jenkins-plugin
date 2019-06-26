@@ -19,7 +19,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 public class UForgeBuilderTest {
 
     private static final String URL = "http://my-forge.com/api";
-    private static final String VERSION = "3.8.11";
     private static final String CREDENTIALS_ID = "my-credentials";
     private static final String TEMPLATE_PATH = "./template.yml";
 
@@ -30,20 +29,20 @@ public class UForgeBuilderTest {
 
     @Before
     public void before() {
-        this.builder = spy(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH));
+        this.builder = spy(new UForgeBuilder(URL, CREDENTIALS_ID, TEMPLATE_PATH));
     }
 
     @Test
     public void should_project_stay_unchanged_and_password_hidden_after_roundtrip_configuration() throws Exception {
         // given
         FreeStyleProject project = jenkins.createFreeStyleProject();
-        project.getBuildersList().add(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH));
+        project.getBuildersList().add(new UForgeBuilder(URL, CREDENTIALS_ID, TEMPLATE_PATH));
 
         // when
         project = jenkins.configRoundtrip(project);
 
         // then
-        jenkins.assertEqualDataBoundBeans(new UForgeBuilder(URL, VERSION, CREDENTIALS_ID, TEMPLATE_PATH), project.getBuildersList().get(0));
+        jenkins.assertEqualDataBoundBeans(new UForgeBuilder(URL, CREDENTIALS_ID, TEMPLATE_PATH), project.getBuildersList().get(0));
     }
 
     @Test
@@ -66,7 +65,6 @@ public class UForgeBuilderTest {
         String pipelineScript
                 = "node {\n"
                 + "  uforge "
-                + "version: '" + VERSION + "', "
                 + "credentialsId: '" + CREDENTIALS_ID + "', "
                 + "templatePath : '" + TEMPLATE_PATH + "'\n"
                 + "}";

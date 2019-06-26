@@ -3,9 +3,6 @@
     <f:entry title="${%URL}" field="url">
         <f:textbox />
     </f:entry>
-    <f:entry title="${%Version}" field="version">
-        <f:textbox />
-    </f:entry>
     <f:entry title="${%CredentialsId}" field="credentialsId">
         <c:select/>
     </f:entry>
