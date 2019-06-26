@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import hudson.AbortException;
 import hudson.util.ArgumentListBuilder;
 
 public class InstallStep extends UForgeStep {
@@ -56,7 +57,9 @@ public class InstallStep extends UForgeStep {
                 File curfile = new File(out, entry.getName());
                 File parent = curfile.getParentFile();
                 if (!parent.exists()) {
-                    parent.mkdirs();
+                    if (!parent.mkdirs()) {
+                        throw new AbortException(Messages.Logs_errors_scriptFailure());
+                    }
                 }
                 IOUtils.copy(fin, new FileOutputStream(curfile));
             }
