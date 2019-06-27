@@ -40,7 +40,7 @@ public class InstallStepTest {
     public void setUp() throws Exception {
         initMocks(this);
         FieldSetter.setField(installStep, InstallStep.class.getDeclaredField("version"), VERSION);
-        FieldSetter.setField(installStep, UForgeStep.class.getDeclaredField("launcher"), launcher);
+        FieldSetter.setField(installStep, HammrStep.class.getDeclaredField("launcher"), launcher);
 
         doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
         doReturn(new FilePath(new File("workspace"))).when(launcher).getWorkspace();

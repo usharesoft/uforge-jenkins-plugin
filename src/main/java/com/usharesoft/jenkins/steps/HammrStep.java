@@ -4,18 +4,33 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
-import hudson.FilePath;
+import java.io.IOException;
 
-public abstract class HammrStep extends UForgeStep {
+import hudson.FilePath;
+import hudson.util.ArgumentListBuilder;
+
+public abstract class HammrStep {
+    UForgeLauncher launcher;
     String url;
     StandardUsernamePasswordCredentials credentials;
     FilePath templatePath;
 
+    public abstract void perform() throws InterruptedException, IOException;
+
     HammrStep(UForgeLauncher launcher, String url, StandardUsernamePasswordCredentials credentials, FilePath templatePath) {
-        super(launcher);
+        this.launcher = launcher;
         this.url = url;
         this.credentials = credentials;
         this.templatePath = templatePath;
+    }
+
+    void printStep(String message) throws InterruptedException, IOException {
+        ArgumentListBuilder args = new ArgumentListBuilder();
+        args.add("echo");
+        args.add(UForgeLauncher.CMD_PREFIX);
+        args.add(message);
+
+        launcher.launch(args, true);
     }
 
     String getUsername() {

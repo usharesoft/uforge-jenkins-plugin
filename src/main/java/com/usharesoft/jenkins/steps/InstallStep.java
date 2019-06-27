@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
@@ -67,19 +68,18 @@ public class InstallStep extends HammrStep {
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
 
-            handleStatus(connection.getResponseCode());
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
+            int status = connection.getResponseCode();
+            if (status == 401) {
+                throw new AbortException(Messages.UForgeInstall_version_errors_wrongCredentials());
+            } else if (status != 200) {
+                throw new AbortException(Messages.UForgeInstall_version_errors_unknownError());
             }
 
-            in.close();
+            String version = getVersionFromResponse(connection.getInputStream());
+
             connection.disconnect();
 
-            return getVersionFromResponse(content);
+            return version;
 
         } catch (MalformedURLException | SAXException | ParserConfigurationException e) {
             e.printStackTrace();
@@ -140,21 +140,22 @@ public class InstallStep extends HammrStep {
         return args;
     }
 
-    void handleStatus(int status) throws AbortException {
-        if (status == 401) {
-            throw new AbortException(Messages.UForgeInstall_version_errors_wrongCredentials());
-        } else if (status != 200) {
-            throw new AbortException(Messages.UForgeInstall_version_errors_unknownError());
-        }
-    }
+    String getVersionFromResponse(InputStream stream) throws ParserConfigurationException, IOException, SAXException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        String inputLine;
+        StringBuilder content = new StringBuilder();
 
-    String getVersionFromResponse(StringBuilder content) throws ParserConfigurationException, IOException, SAXException {
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
+        }
+
+        in.close();
+
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
                 .parse(new InputSource(new StringReader(content.toString())));
 
-        NodeList errNodes = doc.getElementsByTagName("ns0:serviceStatus");
+        Element status = (Element) doc.getElementsByTagName("ns0:serviceStatus").item(0);
 
-        Element err = (Element)errNodes.item(0);
-        return err.getElementsByTagName("version").item(0).getTextContent();
+        return status.getElementsByTagName("version").item(0).getTextContent();
     }
 }

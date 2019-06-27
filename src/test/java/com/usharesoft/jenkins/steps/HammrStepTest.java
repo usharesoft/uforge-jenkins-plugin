@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class UForgeStepTest {
+public class HammrStepTest {
 
     @Spy
     @InjectMocks
