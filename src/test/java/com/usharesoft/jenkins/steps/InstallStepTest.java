@@ -40,7 +40,7 @@ public class InstallStepTest {
     public void setUp() throws Exception {
         initMocks(this);
         FieldSetter.setField(installStep, InstallStep.class.getDeclaredField("version"), VERSION);
-        FieldSetter.setField(installStep, UForgeStep.class.getDeclaredField("launcher"), launcher);
+        FieldSetter.setField(installStep, HammrStep.class.getDeclaredField("launcher"), launcher);
 
         doReturn(new FilePath(new File("workspace"))).when(launcher).getVenvDirectory();
         doReturn(new FilePath(new File("workspace"))).when(launcher).getWorkspace();
@@ -54,12 +54,14 @@ public class InstallStepTest {
         doReturn(args).when(installStep).getInitVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
         doNothing().when(installStep).printStep(any());
+        doReturn("1234").when(installStep).getUForgeVersion();
 
         // when
         installStep.perform();
 
         //then
         verify(installStep).printStep(any());
+        verify(installStep).getUForgeVersion();
         verify(installStep).downloadVirtualenv();
         verify(installStep).decompress(any(), any());
         verify(installStep).getInitVenvCmd();

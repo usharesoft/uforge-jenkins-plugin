@@ -43,24 +43,18 @@ import jenkins.tasks.SimpleBuildStep;
 
 public class UForgeBuilder extends Builder implements SimpleBuildStep {
     private final String url;
-    private final String version;
     private final String credentialsId;
     private final String templatePath;
 
     @DataBoundConstructor
-    public UForgeBuilder(String url, String version, String credentialsId, String templatePath) {
+    public UForgeBuilder(String url, String credentialsId, String templatePath) {
         this.url = Util.fixNull(url);
-        this.version = Util.fixNull(version);
         this.credentialsId = Util.fixNull(credentialsId);
         this.templatePath = Util.fixNull(templatePath);
     }
 
     public String getUrl() {
         return url;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     public String getCredentialsId() {
@@ -75,10 +69,6 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         boolean missingParameter = false;
         if (url.isEmpty()) {
             logger.println(Messages.UForgeBuilder_errors_missingUrl());
-            missingParameter = true;
-        }
-        if (version.isEmpty()) {
-            logger.println(Messages.UForgeBuilder_errors_missingVersion());
             missingParameter = true;
         }
         if (credentialsId.isEmpty()) {
@@ -126,7 +116,7 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         UForgeLauncher uForgeLauncher = new UForgeLauncher(run, workspace.child("uforge"), launcher, listener);
         uForgeLauncher.init(envAction);
 
-        InstallStep installStep = new InstallStep(uForgeLauncher, version);
+        InstallStep installStep = new InstallStep(uForgeLauncher, url, credentials, absoluteTemplatePath);
         installStep.perform();
 
         CreateStep createStep = new CreateStep(uForgeLauncher, url, credentials, absoluteTemplatePath);
@@ -160,10 +150,6 @@ public class UForgeBuilder extends Builder implements SimpleBuildStep {
         }
 
         public FormValidation doCheckUrl(@QueryParameter String value) {
-            return doCheckField(value);
-        }
-
-        public FormValidation doCheckVersion(@QueryParameter String value) {
             return doCheckField(value);
         }
 
