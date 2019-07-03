@@ -49,8 +49,8 @@ public class InstallStepTest {
     @Test
     public void should_perform_launch_install_commands() throws IOException, InterruptedException {
         // given
-        doNothing().when(installStep).downloadVirtualenv();
-        doNothing().when(installStep).decompress(any(), any());
+        doNothing().when(installStep).downloadVirtualenv(any());
+        doNothing().when(installStep).decompress(any());
         doReturn(args).when(installStep).getInitVenvCmd();
         doReturn(args).when(installStep).getInstallHammrCmd();
         doNothing().when(installStep).printStep(any());
@@ -62,8 +62,8 @@ public class InstallStepTest {
         //then
         verify(installStep).printStep(any());
         verify(installStep).getUForgeVersion();
-        verify(installStep).downloadVirtualenv();
-        verify(installStep).decompress(any(), any());
+        verify(installStep).downloadVirtualenv(any());
+        verify(installStep).decompress(any());
         verify(installStep).getInitVenvCmd();
         verify(installStep).getInstallHammrCmd();
         verify(launcher, times(2)).launchInstall(eq(args), eq(true));
