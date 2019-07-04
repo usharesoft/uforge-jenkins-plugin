@@ -5,21 +5,12 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.usharesoft.jenkins.Messages;
 import com.usharesoft.jenkins.launcher.UForgeLauncher;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,8 +39,11 @@ public class InstallStep extends HammrStep {
     public void perform() throws InterruptedException, IOException {
         printStep(Messages.Logs_steps_install());
         version = getUForgeVersion();
-        downloadVirtualenv();
-        decompress(launcher.getWorkspace() + "/virtualenv.tar.gz", new File(launcher.getWorkspace().getRemote()));
+
+        FilePath venvSources = new FilePath(launcher.getWorkspace(), launcher.getWorkspace() + "/virtualenv.tar.gz");
+        downloadVirtualenv(venvSources);
+        decompress(venvSources);
+
         launcher.launchInstall(getInitVenvCmd(), true);
         launcher.launchInstall(getInstallHammrCmd(), true);
     }
@@ -89,35 +83,14 @@ public class InstallStep extends HammrStep {
         }
     }
 
-    void downloadVirtualenv() {
-        try {
-            FileUtils.copyURLToFile(
-                    new URL("https://github.com/pypa/virtualenv/tarball/16.6.1"),
-                    new File(launcher.getWorkspace() + "/virtualenv.tar.gz"),
-                    5000,
-                    5000);
-        } catch (IOException e) {
-            e.printStackTrace();
+    void downloadVirtualenv(FilePath venvSources) throws InterruptedException, IOException {
+        try (InputStream in = new URL("https://github.com/pypa/virtualenv/tarball/16.6.1").openStream()) {
+            venvSources.copyFrom(in);
         }
     }
 
-    void decompress(String in, File out) throws IOException {
-        try (TarArchiveInputStream fin = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(in)))) {
-            TarArchiveEntry entry;
-            while ((entry = fin.getNextTarEntry()) != null) {
-                if (entry.isDirectory()) {
-                    continue;
-                }
-                File curfile = new File(out, entry.getName());
-                File parent = curfile.getParentFile();
-                if (!parent.exists()) {
-                    if (!parent.mkdirs()) {
-                        throw new AbortException(Messages.Logs_errors_scriptFailure());
-                    }
-                }
-                IOUtils.copy(fin, new FileOutputStream(curfile));
-            }
-        }
+    void decompress(FilePath venvSources) throws IOException, InterruptedException {
+        venvSources.untar(launcher.getWorkspace(), FilePath.TarCompression.GZIP);
     }
 
     ArgumentListBuilder getInitVenvCmd() {
